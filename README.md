@@ -148,7 +148,7 @@ This formulation captures three key properties:
 For practical application with small ranges of complexity, a linear approximation may be suitable:
 
 $$
-\mathcal{A}(t) \approx \mathcal{A}_{\text{min}} + \delta \cdot A_{\text{sys}}^{(t)}
+\mathcal{A}(t) \approx \mathcal{A_{\text{min}}} + \delta \cdot A_{\text{sys}}^{(t)}
 $$
 
 where:
@@ -158,7 +158,7 @@ where:
 **Empirical Validation:**  
 This relationship can be validated by:
 1. Measuring $A_{\text{sys}}^{(t)}$ and $\mathcal{A}(t)$ at multiple training epochs,
-2. Fitting the model parameters ($\mathcal{A}_{\text{base}}$, $\gamma$, $\beta$) or ($\mathcal{A}_{\text{min}}$, $\delta$),
+2. Fitting the model parameters ($\mathcal{A_{\text{base}}}$, $\gamma$, $\beta$) or ($\mathcal{A}_{\text{min}}$, $\delta$),
 3. Testing predictive power on held-out model configurations.
 
 ---
