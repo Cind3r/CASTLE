@@ -162,6 +162,79 @@ This relationship can be validated by:
 2. Fitting the model parameters ($\mathcal{A}\_{\text{base}}$, $\gamma$, $\beta$) or ($\mathcal{A}\_{\text{min}}$, $\delta$),
 3. Testing predictive power on held-out model configurations.
 
+For testing parameters: 
+
+```python
+# Validate the relationship for breast cancer dataset
+breast_cancer = load_breast_cancer()
+X_bc = breast_cancer.data
+y_bc = breast_cancer.target
+X_train, X_test, y_train, y_test = train_test_split(
+    X_bc, y_bc, test_size=0.2, random_state=42
+)
+scaler_bc = StandardScaler()
+X_train_scaled = scaler_bc.fit_transform(X_train)
+X_test_scaled = scaler_bc.transform(X_test)
+
+
+bc_model = MolecularTrackedNeuralNet(
+    input_size=X_train_scaled.shape[1],
+    hidden_sizes=[16, 8, 4],
+    output_size=1,
+    dropout=0.2
+)
+bc_model, bc_tracker, bc_losses, bc_accuracies, bc_complexities = train_with_molecular_parameter_updates(
+    model=bc_model,
+    X_train=X_train_scaled,
+    y_train=y_train,
+    X_test=X_test_scaled,
+    y_test=y_test,
+    epochs=50,
+    lr=0.001,
+    track_every=5,
+    molecule_size=2,
+    complexity_range=(3,8)    # Cap for beneficial complexity
+)
+
+iris_train, iris_test, y_train, y_test = train_test_split(
+    X_iris, y_iris_binary, test_size=0.2, random_state=42
+)
+scaler_iris = StandardScaler()
+X_train_scaled = scaler_iris.fit_transform(iris_train)
+X_test_scaled = scaler_iris.transform(iris_test)
+
+iris_model = MolecularTrackedNeuralNet(
+    input_size=X_train_scaled.shape[1],
+    hidden_sizes=[16, 8, 4],
+    output_size=1,
+    dropout=0.2
+)
+iris_model, iris_tracker, iris_losses, iris_accuracies, iris_complexities = train_with_molecular_parameter_updates(
+    model=iris_model,
+    X_train=X_train_scaled,
+    y_train=y_train,
+    X_test=X_test_scaled,
+    y_test=y_test,
+    epochs=50,
+    lr=0.001,
+    track_every=5,
+    molecule_size=2,
+    complexity_range=(3,8)    # Cap for beneficial complexity
+)
+
+bc_df = analyze_complexity_accuracy_relationship(
+    complexities=bc_complexities,
+    accuracies=bc_accuracies,
+    dataset_name="Breast Cancer"
+)
+
+iris_df = analyze_complexity_accuracy_relationship(
+    complexities=iris_complexities,
+    accuracies=iris_accuracies,
+    dataset_name="Iris"
+)
+```
+
 Based on experimental validation, two distinct relationship patterns emerge:
 
 ### 11.1 Empirical Complexity-Accuracy Relationships (Iris)
