@@ -1,7 +1,3 @@
-# C.A.S.T.L.E.
-
-#### Component Assembly Structure Tracking for Learning Emergence
-
 
 # Mathematical Model of Assembly Tracking Neural Network with Atomic Codes
 
