@@ -58,7 +58,7 @@ where:
 #### 5. **Complexity Reward in Loss Function**
 During training, modify the loss function to reward or penalize assembly complexity:
 $$
-\mathcal{L}_{\text{total}} = \mathcal{L}_{\text{base}} - \lambda \cdot R(A(L))
+\mathcal{L_{\text{total}}} = \mathcal{L}_{\text{base}} - \lambda \cdot R(A(L))
 $$
 where:
 - $\mathcal{L}_{\text{total}}$: total loss,
@@ -131,7 +131,7 @@ This metric rewards reuse (high $n_s$) and penalizes diversity (high $u_s$), whi
 Let $\mathcal{A}(t)$ denote the model accuracy at time $t$, and $A_{\text{sys}}^{(t)}$ represent the system assembly complexity. The relationship between accuracy and complexity can be modeled as:
 
 $$
-\mathcal{A}(t) = \mathcal{A}_{\text{base}} + \gamma \cdot \left(1 - e^{-\beta \cdot A_{\text{sys}}^{(t)}}\right)
+\mathcal{A}(t) = \mathcal{A_{\text{base}}} + \gamma \cdot \left(1 - e^{-\beta \cdot A_{\text{sys}}^{(t)}}\right)
 $$
 
 where:
