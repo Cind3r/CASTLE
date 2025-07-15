@@ -2,6 +2,8 @@
 
 #### Component Assembly Structure Tracking for Learning Emergence
 
+This mathematical formalism describes the assembly tracking neural network, which partitions weight tensors into molecular blocks and assigns atomic codes based on block statistics. The resulting molecular lattice encodes the network's structural motifs, enabling calculation of an assembly index that quantifies modularity and reuse. During training, the loss function incorporates a complexity reward or penalty derived from the assembly index, and gradients are modulated according to molecular reuse. If the assembly index exceeds a threshold, the architecture is evolved to favor more efficient or interpretable structures. This approach bridges neural network optimization with principles from assembly theory, promoting modularity, interpretability, and adaptive architectural evolution.
+
 ***
 ## Mathematical Model of Assembly Tracking Neural Network with Atomic Codes
 
@@ -279,4 +281,4 @@ There is meaningful relationships that can be describe depending on hyper-parame
 
 ---
 
-This mathematical formalism describes the assembly tracking neural network, which partitions weight tensors into molecular blocks and assigns atomic codes based on block statistics. The resulting molecular lattice encodes the network's structural motifs, enabling calculation of an assembly index that quantifies modularity and reuse. During training, the loss function incorporates a complexity reward or penalty derived from the assembly index, and gradients are modulated according to molecular reuse. If the assembly index exceeds a threshold, the architecture is evolved to favor more efficient or interpretable structures. This approach bridges neural network optimization with principles from assembly theory, promoting modularity, interpretability, and adaptive architectural evolution.
+
