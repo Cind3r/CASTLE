@@ -1,9 +1,9 @@
-# **C.A.S.T.L.E.**
+# C.A.S.T.L.E.
 
 #### Component Assembly Structure Tracking for Learning Emergence
 
 
-## Mathematical Model of Assembly Tracking Neural Network with Atomic Codes
+# Mathematical Model of Assembly Tracking Neural Network with Atomic Codes
 
 ## 1. Weight Tensor Partitioning
 
@@ -164,4 +164,4 @@ This relationship can be validated by:
 
 ---
 
-This mathematical formalism describes the assembly tracking neural network, which partitions weight tensors into molecular blocks and assigns atomic codes based on block statistics. The resulting molecular lattice encodes the network's structural motifs, enabling calculation of an assembly index that quantifies modularity and reuse. During training, the loss function incorporates a complexity reward or penalty derived from the assembly index, and gradients are modulated according to molecular reuse. If the assembly index exceeds a threshold, the architecture is evolved to favor more efficient or interpretable structures. This approach bridges neural network optimization with principles from assembly theory, promoting modularity,
+This mathematical formalism describes the assembly tracking neural network, which partitions weight tensors into molecular blocks and assigns atomic codes based on block statistics. The resulting molecular lattice encodes the network's structural motifs, enabling calculation of an assembly index that quantifies modularity and reuse. During training, the loss function incorporates a complexity reward or penalty derived from the assembly index, and gradients are modulated according to molecular reuse. If the assembly index exceeds a threshold, the architecture is evolved to favor more efficient or interpretable structures. This approach bridges neural network optimization with principles from assembly theory, promoting modularity, interpretability, and adaptive architectural evolution.
