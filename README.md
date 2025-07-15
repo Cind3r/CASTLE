@@ -191,9 +191,11 @@ Observed for Breast Cancer dataset: $\epsilon = -0.0000$, $R^2 = 1.0000$
 ### 11.3 Dataset-Dependent Complexity Effects
 The relationship between assembly complexity and model performance is dataset-dependent:
 
-Iris Dataset: Exhibits clear optimal complexity where performance is maximized
-Breast Cancer Dataset: Shows complexity-independent performance
-General Pattern: Complex relationships require empirical validation per dataset
+- Iris Dataset: Exhibits clear optimal complexity where performance is maximized
+- Breast Cancer Dataset: Shows complexity-independent performance
+- General Pattern: Complex relationships require empirical validation per dataset
+
+There is meaningful relationships that can be describe depending on hyper-parameters as well as model training standards. The baseline relationship shows a consistent trend and is worth investigating due to the significant performance increase compared to baseline neural nets in terms of f1-score and accuracy across classes. 
 
 
 ---
