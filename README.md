@@ -165,6 +165,9 @@ This relationship can be validated by:
 Based on experimental validation, two distinct relationship patterns emerge:
 
 ### 11.1 Empirical Complexity-Accuracy Relationships (Iris)
+
+<img width="1189" height="989" alt="image" src="https://github.com/user-attachments/assets/18f12ed4-04c8-4d4b-a912-eebedceab600" />
+
 Pattern 1: Quadratic Relationship with Optimal Complexity 
 
 $$
@@ -177,6 +180,9 @@ Optimal complexity occurs at $A_{\text{opt}} = \frac{b}{2c}$
 Observed for Iris dataset: $A_{\text{opt}} = 1.87$, $R^2 = 0.9989$
 
 ### 11.2 Empirical Complexity-Accuracy Relationships (Breast Cancer)
+
+<img width="1189" height="989" alt="image" src="https://github.com/user-attachments/assets/b1fcf89e-81e6-4123-841c-2de7740f6c90" />
+
 Pattern 2: Complexity-Independent Accuracy 
 
 $$
