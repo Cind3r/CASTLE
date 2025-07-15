@@ -166,7 +166,11 @@ Based on experimental validation, two distinct relationship patterns emerge:
 
 ### 11.1 Empirical Complexity-Accuracy Relationships (Iris)
 Pattern 1: Quadratic Relationship with Optimal Complexity 
-$$\mathcal{A}(t) = a + b \cdot A_{\text{sys}}^{(t)} - c \cdot \left(A_{\text{sys}}^{(t)}\right)^2$$ 
+
+$$
+\mathcal{A}(t) = a + b \cdot A_{\text{sys}}^{(t)} - c \cdot \left(A_{\text{sys}}^{(t)}\right)^2
+$$ 
+
 where:
 
 Optimal complexity occurs at $A_{\text{opt}} = \frac{b}{2c}$
@@ -174,7 +178,11 @@ Observed for Iris dataset: $A_{\text{opt}} = 1.87$, $R^2 = 0.9989$
 
 ### 11.2 Empirical Complexity-Accuracy Relationships (Breast Cancer)
 Pattern 2: Complexity-Independent Accuracy 
-$$\mathcal{A}(t) = \mathcal{A}{\text{const}} + \epsilon \cdot A{\text{sys}}^{(t)}$$ 
+
+$$
+\mathcal{A}(t) = \mathcal{A}{\text{const}} + \epsilon \cdot A{\text{sys}}^{(t)}
+$$ 
+
 where:
 
 $\epsilon \approx 0$ (coefficient near zero)
