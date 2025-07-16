@@ -8,6 +8,7 @@ import pandas as pd
 import hashlib
 from collections import defaultdict
 from typing import Dict, List, Tuple, Optional
+from dataclasses import dataclass
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, accuracy_score, confusion_matrix, classification_report
 from sklearn.decomposition import PCA
@@ -15,6 +16,76 @@ from sklearn.decomposition import PCA
 # self made imports
 from core.molecules import WeightMolecule
 from core.lattice import MolecularLattice
+
+
+@dataclass
+class WeightMolecule:
+    """A discrete molecular unit representing a spatial region of weights"""
+    atomic_weight: float  # Average of the kxk region
+    atomic_symbol: str    # Symbol based on weight magnitude
+    position: Tuple[int, int]  # Position in the lattice
+    size: Tuple[int, int]      # Size of the molecule (kxk)
+    
+    def __str__(self):
+        return f"{self.atomic_symbol}_{self.atomic_weight:.2f}"
+    
+    def __hash__(self):
+        return hash((self.atomic_symbol, round(self.atomic_weight, 2)))
+    
+    def __eq__(self, other):
+        return (self.atomic_symbol == other.atomic_symbol and 
+                abs(self.atomic_weight - other.atomic_weight) < 0.01)
+    
+
+@dataclass
+class MolecularLattice:
+    """A 2D lattice structure of weight molecules"""
+    molecules: List[List[WeightMolecule]]
+    layer_name: str
+    epoch: int
+    lattice_id: str
+    
+    def __post_init__(self):
+        if not self.lattice_id:
+            self.lattice_id = self._generate_lattice_id()
+    
+    def _generate_lattice_id(self): # -> str:
+        """Generate unique ID based on molecular composition"""
+        molecule_string = ""
+        for row in self.molecules:
+            for mol in row:
+                molecule_string += str(mol)
+        return hashlib.md5(molecule_string.encode()).hexdigest()[:8]
+    
+    def get_molecular_formula(self): # -> str:
+        """Get chemical-like formula for the lattice"""
+        molecule_counts = defaultdict(int)
+        for row in self.molecules:
+            for mol in row:
+                molecule_counts[mol.atomic_symbol] += 1
+        
+        formula = ""
+        for symbol, count in sorted(molecule_counts.items()):
+            if count > 1:
+                formula += f"{symbol}{count}"
+            else:
+                formula += symbol
+        return formula
+    
+    def can_be_assembled_from(self, available_lattices: List['MolecularLattice']): # -> bool:
+        """Check if this lattice can be assembled from available molecular components"""
+        our_molecules = set()
+        for row in self.molecules:
+            for mol in row:
+                our_molecules.add(mol)
+        
+        available_molecules = set()
+        for lattice in available_lattices:
+            for row in lattice.molecules:
+                for mol in row:
+                    available_molecules.add(mol)
+        
+        return our_molecules.issubset(available_molecules)
 
 
 class MolecularAssemblyTracker:
@@ -388,3 +459,58 @@ class MolecularAssemblyTracker:
         
         plt.tight_layout()
         plt.show()
+
+
+
+class MolecularNeuralNet(nn.Module):
+    
+    def __init__(self, input_size, hidden_sizes, output_size=1, dropout=0.1):
+        super().__init__()
+        
+        # Build layers
+        layer_sizes = [input_size] + hidden_sizes + [output_size]
+        self.layers = nn.ModuleList()
+        
+        for i in range(len(layer_sizes) - 1):
+            self.layers.append(nn.Linear(layer_sizes[i], layer_sizes[i+1]))
+            if i < len(layer_sizes) - 2:  # Don't add dropout to output layer
+                self.layers.append(nn.Dropout(dropout))
+
+        # Initialize weights to create molecular patterns
+        self._initialize_weights()
+    
+
+    def initialize_with_molecular_structure(self, layer: nn.Linear, tracker: MolecularAssemblyTracker, reference_layer_name: str):
+        """Initialize layer weights based on molecular patterns from reference layer"""
+        
+        if reference_layer_name in tracker.layer_lattices:
+            # Get the most recent lattice structure
+            latest_lattice_id = tracker.layer_lattices[reference_layer_name][-1]
+            reference_lattice = tracker.lattice_library[latest_lattice_id]
+            
+            # Initialize weights to preserve successful molecular patterns
+            with torch.no_grad():
+                for i, molecule_row in enumerate(reference_lattice.molecules):
+                    for j, molecule in enumerate(molecule_row):
+                        if len(tracker.molecule_reuse[molecule]) > 1:
+                            # This molecule was successful - use its pattern
+                            target_weight = molecule.atomic_weight
+                            
+                            # Apply to corresponding region in new layer
+                            if i < layer.weight.shape[0] and j < layer.weight.shape[1]:
+                                layer.weight[i, j] = target_weight
+    
+    def _initialize_weights(self):
+        for layer in self.layers:
+            if isinstance(layer, nn.Linear):
+                # Initialize with weights
+                nn.init.normal_(layer.weight, mean=0, std=0.1)
+                if layer.bias is not None:
+                    nn.init.constant_(layer.bias, 0)
+    
+    def forward(self, x):
+        for layer in self.layers:
+            x = layer(x)
+            if isinstance(layer, nn.Linear) and layer != self.layers[-1]:
+                x = torch.relu(x)
+        return torch.sigmoid(x)

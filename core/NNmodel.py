@@ -52,42 +52,6 @@ class MolecularNeuralNet(nn.Module):
                             if i < layer.weight.shape[0] and j < layer.weight.shape[1]:
                                 layer.weight[i, j] = target_weight
     
-    def apply_molecular_transfer(self, tracker: MolecularAssemblyTracker, epoch: int):
-        """Apply molecular pattern transfer to all layers during training"""
-        
-        for idx, layer in enumerate(self.layers):
-            if isinstance(layer, nn.Linear):
-                layer_name = f"layers.{idx}.weight"
-                
-                # Check if we have successful molecular patterns to transfer
-                if layer_name in tracker.layer_lattices and len(tracker.layer_lattices[layer_name]) > 0:
-                    # Get the most recent lattice
-                    latest_lattice_id = tracker.layer_lattices[layer_name][-1]
-                    if latest_lattice_id in tracker.lattice_library:
-                        lattice = tracker.lattice_library[latest_lattice_id]
-                        
-                        # Apply molecular transfer
-                        with torch.no_grad():
-                            for i, molecule_row in enumerate(lattice.molecules):
-                                for j, molecule in enumerate(molecule_row):
-                                    if len(tracker.molecule_reuse.get(molecule, [])) > 1:
-                                        # This molecule was successful - reinforce its pattern
-                                        start_i = i * tracker.molecule_size
-                                        end_i = min(start_i + tracker.molecule_size, layer.weight.shape[0])
-                                        start_j = j * tracker.molecule_size
-                                        end_j = min(start_j + tracker.molecule_size, layer.weight.shape[1])
-                                        
-                                        # Apply a small adjustment towards the molecular pattern
-                                        target_weight = molecule.atomic_weight
-                                        current_region = layer.weight[start_i:end_i, start_j:end_j]
-                                        
-                                        # Gradually move towards the successful pattern
-                                        adjustment_factor = 0.1  # Small adjustment to avoid disrupting training
-                                        layer.weight[start_i:end_i, start_j:end_j] = (
-                                            current_region * (1 - adjustment_factor) + 
-                                            target_weight * adjustment_factor
-                                        )
-    
     def _initialize_weights(self):
         for layer in self.layers:
             if isinstance(layer, nn.Linear):
