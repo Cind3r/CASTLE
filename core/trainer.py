@@ -302,8 +302,8 @@ def evolve_architecture_with_complexity_rewards(X_train: torch.Tensor, hidden_la
 def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_test, 
                                          epochs=100, lr=0.001, track_every=10,
                                          molecule_size=2, 
-                                         complexity_range=(3, 8)):  # Target complexity range
-    """Train with appropriate complexity management"""
+                                         complexity_range=(3, 8)):
+    """Train with appropriate complexity management - supports both binary and multi-class"""
     
     # Initialize tracker
     tracker = MolecularAssemblyTracker(molecule_size=molecule_size)
@@ -311,7 +311,7 @@ def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_te
     # Data conversion and setup
     X_train_tensor = torch.FloatTensor(X_train)
     X_test_tensor = torch.FloatTensor(X_test)
-
+    
     # Handle different target formats
     if len(y_train.shape) == 1:
         # Binary classification: convert to proper shape
@@ -325,14 +325,14 @@ def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_te
         y_test_tensor = torch.FloatTensor(y_test)
         criterion = nn.CrossEntropyLoss()
         is_binary = False
-
+    
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
     
     losses = []
     accuracies = []
     complexities = []
     
-    print("Starting complexity-managed training...")
+    print(f"Starting complexity-managed training ({'binary' if is_binary else 'multi-class'})...")
     
     for epoch in range(epochs):
         # Track molecular assembly
@@ -356,10 +356,8 @@ def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_te
             # Adjust learning based on complexity
             complexity_modifier = 1.0
             if current_complexity < complexity_range[0]:
-                # Too simple - encourage exploration
                 complexity_modifier = 1.2
             elif current_complexity > complexity_range[1]:
-                # Too complex - encourage simplification
                 complexity_modifier = 0.8
                 
             for param_group in optimizer.param_groups:
@@ -370,7 +368,14 @@ def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_te
         optimizer.zero_grad()
         
         outputs = model(X_train_tensor)
-        loss = criterion(outputs, y_train_tensor)
+        
+        if is_binary:
+            loss = criterion(outputs, y_train_tensor)
+        else:
+            # For multi-class, convert one-hot to class indices
+            targets = torch.argmax(y_train_tensor, dim=1)
+            loss = criterion(outputs, targets)
+        
         loss.backward()
         
         # Apply guided updates based on molecular structure
@@ -383,13 +388,11 @@ def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_te
                     for i, molecule_row in enumerate(lattice.molecules):
                         for j, molecule in enumerate(molecule_row):
                             if len(tracker.molecule_reuse.get(molecule, [])) > 1:
-                                # This is a reused molecule - maintain its structure
                                 start_i = i * tracker.molecule_size
                                 end_i = start_i + tracker.molecule_size
                                 start_j = j * tracker.molecule_size
                                 end_j = start_j + tracker.molecule_size
                                 
-                                # Reduce gradient magnitude to preserve structure
                                 param.grad[start_i:end_i, start_j:end_j] *= 0.9
         
         optimizer.step()
@@ -398,8 +401,15 @@ def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_te
         model.eval()
         with torch.no_grad():
             test_outputs = model(X_test_tensor)
-            test_predictions = (test_outputs > 0.5).float()
-            accuracy = (test_predictions == y_test_tensor).float().mean().item()
+            
+            if is_binary:
+                test_predictions = (torch.sigmoid(test_outputs) > 0.5).float()
+                accuracy = (test_predictions == y_test_tensor).float().mean().item()
+            else:
+                test_predictions = torch.argmax(test_outputs, dim=1)
+                test_targets = torch.argmax(y_test_tensor, dim=1)
+                accuracy = (test_predictions == test_targets).float().mean().item()
+            
             accuracies.append(accuracy)
         
         losses.append(loss.item())
