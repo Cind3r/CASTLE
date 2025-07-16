@@ -299,7 +299,7 @@ def evolve_architecture_with_complexity_rewards(X_train: torch.Tensor, hidden_la
 # =========== MAIN TRAINING METHOD ============
 # ===================================================
 
-def train_complexity_aware(model, X_train, y_train, X_test, y_test, 
+def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_test, 
                                          epochs=100, lr=0.001, track_every=10,
                                          molecule_size=2, 
                                          complexity_range=(3, 8)):  # Target complexity range
@@ -399,3 +399,111 @@ def train_complexity_aware(model, X_train, y_train, X_test, y_test,
     
     return model, tracker, losses, accuracies, complexities
 
+
+# Other train methods with molecular assembly updates
+# def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_test, 
+#                                          epochs=100, lr=0.001, track_every=5,
+#                                          molecule_size=2, assembly_weight=0.1):
+#     """Train with molecular assembly-guided parameter updates"""
+    
+#     tracker = MolecularAssemblyTracker(molecule_size=molecule_size)
+    
+#     # Convert to tensors
+#     X_train_tensor = torch.FloatTensor(X_train)
+#     y_train_tensor = torch.FloatTensor(y_train).unsqueeze(1)
+#     X_test_tensor = torch.FloatTensor(X_test)
+#     y_test_tensor = torch.FloatTensor(y_test).unsqueeze(1)
+    
+#     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+#     criterion = nn.BCELoss()
+    
+#     losses = []
+#     accuracies = []
+#     assembly_losses = []
+    
+#     print("Starting molecular assembly-guided training...")
+    
+#     for epoch in range(epochs):
+#         model.train()
+#         optimizer.zero_grad()
+        
+#         # Standard forward pass
+#         outputs = model(X_train_tensor)
+#         base_loss = criterion(outputs, y_train_tensor)
+        
+#         # Track molecular assembly
+#         if epoch % track_every == 0:
+#             tracker.track_epoch(model, epoch)
+        
+#         # Compute assembly complexity penalty
+#         assembly_penalty = 0.0
+#         lattice_data = {}
+        
+#         for name, param in model.named_parameters():
+#             if 'weight' in name and len(param.shape) == 2:
+#                 # Convert to molecular lattice
+#                 lattice = tracker.tensor_to_molecular_lattice(param, name, epoch)
+#                 lattice_data[name] = lattice
+                
+#                 # Penalize excessive complexity
+#                 assembly_index = tracker.calculate_assembly_index(lattice)
+#                 if assembly_index > 8:  # Complexity threshold
+#                     assembly_penalty += (assembly_index - 8) * 0.01
+        
+#         # Combined loss
+#         total_loss = base_loss + assembly_weight * assembly_penalty
+#         total_loss.backward()
+        
+#         # Modify gradients based on molecular structure
+#         for name, param in model.named_parameters():
+#             if name in lattice_data and param.grad is not None:
+#                 lattice = lattice_data[name]
+#                 grad_modifier = tracker.compute_assembly_gradient_modifier(lattice, param.grad)
+#                 param.grad.data *= grad_modifier
+        
+#         optimizer.step()
+        
+#         # Post-optimization molecular adjustments
+#         if epoch % (track_every * 2) == 0:
+#             apply_molecular_constraints(model, tracker)
+        
+#         # Evaluation
+#         model.eval()
+#         with torch.no_grad():
+#             test_outputs = model(X_test_tensor)
+#             test_predictions = (test_outputs > 0.5).float()
+#             accuracy = (test_predictions == y_test_tensor).float().mean()
+        
+#         losses.append(base_loss.item())
+#         assembly_losses.append(assembly_penalty)
+#         accuracies.append(accuracy.item())
+        
+#         if epoch % 20 == 0:
+#             print(f"Epoch {epoch}: Loss={base_loss.item():.4f}, "
+#                   f"Assembly Penalty={assembly_penalty:.4f}, "
+#                   f"Accuracy={accuracy.item():.4f}")
+    
+#     return model, tracker, losses, accuracies, assembly_losses
+
+def apply_molecular_constraints(model: nn.Module, tracker: MolecularAssemblyTracker):
+    """Apply molecular-based constraints to model parameters"""
+    
+    for name, param in model.named_parameters():
+        if 'weight' in name and len(param.shape) == 2:
+            lattice = tracker.tensor_to_molecular_lattice(param, name, 0)
+            
+            with torch.no_grad():
+                # Stabilize highly reused molecules
+                for i, molecule_row in enumerate(lattice.molecules):
+                    for j, molecule in enumerate(molecule_row):
+                        if len(tracker.molecule_reuse[molecule]) > 2:
+                            # Reduce variance in highly reused molecular regions
+                            start_row = i * tracker.molecule_size
+                            end_row = start_row + tracker.molecule_size
+                            start_col = j * tracker.molecule_size
+                            end_col = start_col + tracker.molecule_size
+                            
+                            region = param[start_row:end_row, start_col:end_col]
+                            mean_val = region.mean()
+                            param[start_row:end_row, start_col:end_col] = \
+                                0.8 * region + 0.2 * mean_val
