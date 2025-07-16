@@ -310,12 +310,23 @@ def train_with_molecular_parameter_updates(model, X_train, y_train, X_test, y_te
     
     # Data conversion and setup
     X_train_tensor = torch.FloatTensor(X_train)
-    y_train_tensor = torch.FloatTensor(y_train).unsqueeze(1)
     X_test_tensor = torch.FloatTensor(X_test)
-    y_test_tensor = torch.FloatTensor(y_test).unsqueeze(1)
-    
+
+    # Handle different target formats
+    if len(y_train.shape) == 1:
+        # Binary classification: convert to proper shape
+        y_train_tensor = torch.FloatTensor(y_train).unsqueeze(1)
+        y_test_tensor = torch.FloatTensor(y_test).unsqueeze(1)
+        criterion = nn.BCEWithLogitsLoss()
+        is_binary = True
+    else:
+        # Multi-class classification: use categorical targets
+        y_train_tensor = torch.FloatTensor(y_train)
+        y_test_tensor = torch.FloatTensor(y_test)
+        criterion = nn.CrossEntropyLoss()
+        is_binary = False
+
     optimizer = torch.optim.Adam(model.parameters(), lr=lr)
-    criterion = nn.BCELoss()
     
     losses = []
     accuracies = []
