@@ -1,0 +1,131 @@
+<script type="text/javascript">
+    (function() {{
+        var assemblyPaths = {assembly_paths_json};
+        var epochData = {epoch_data_json};
+        var originalNodeColors = {{}};
+        var originalEdgeColors = {{}};
+
+        function highlightOnClick(clickedNodeId) {{
+            var assemblyPath = assemblyPaths[clickedNodeId] || [];
+            var clickedEpoch = epochData[clickedNodeId];
+            
+            // Get all nodes in all epochs
+            var allNodes = network.body.data.nodes.get();
+            var allEdges = network.body.data.edges.get();
+            
+            // Find which epochs are connected by the assembly path
+            var connectedEpochs = new Set();
+            assemblyPath.forEach(function(nodeId) {{
+                connectedEpochs.add(epochData[nodeId]);
+            }});
+            
+            // Remove the clicked node's epoch from connected epochs
+            connectedEpochs.delete(clickedEpoch);
+            
+            var nodeUpdates = [];
+            var edgeUpdates = [];
+
+            // Store original colors if not already stored
+            allNodes.forEach(function(node) {{
+                if (!originalNodeColors[node.id]) {{
+                    originalNodeColors[node.id] = node.color;
+                }}
+            }});
+            
+            allEdges.forEach(function(edge) {{
+                if (!originalEdgeColors[edge.id]) {{
+                    originalEdgeColors[edge.id] = edge.color;
+                }}
+            }});
+
+            // Color nodes based on the new logic
+            allNodes.forEach(function(node) {{
+                var nodeEpoch = epochData[node.id];
+                var newColor;
+                
+                if (assemblyPath.includes(node.id)) {{
+                    // Assembly path nodes - orange
+                    newColor = '#FF8C00';
+                }} else if (connectedEpochs.has(nodeEpoch)) {{
+                    // Connected epoch nodes - green
+                    newColor = '#32CD32';
+                }} else {{
+                    // All other epoch molecules - light blue
+                    newColor = '#87CEEB';
+                }}
+                
+                nodeUpdates.push({{id: node.id, color: newColor}});
+            }});
+            
+            // Update edge colors to match the highlighting
+            allEdges.forEach(function(edge) {{
+                var fromEpoch = epochData[edge.from];
+                var toEpoch = epochData[edge.to];
+                var newColor;
+                
+                if (assemblyPath.includes(edge.from) && assemblyPath.includes(edge.to)) {{
+                    // Assembly path edges - orange
+                    newColor = '#FF8C00';
+                }} else if (connectedEpochs.has(fromEpoch) || connectedEpochs.has(toEpoch)) {{
+                    // Connected epoch edges - green
+                    newColor = '#32CD32';
+                }} else {{
+                    // Other edges - light gray
+                    newColor = '#D3D3D3';
+                }}
+                
+                edgeUpdates.push({{id: edge.id, color: newColor}});
+            }});
+
+            network.body.data.nodes.update(nodeUpdates);
+            network.body.data.edges.update(edgeUpdates);
+        }}
+
+        function resetColors() {{
+            var nodeUpdates = [];
+            var edgeUpdates = [];
+            var allNodes = network.body.data.nodes.get();
+            var allEdges = network.body.data.edges.get();
+
+            allNodes.forEach(function(node) {{
+                if (originalNodeColors[node.id]) {{
+                    nodeUpdates.push({{id: node.id, color: originalNodeColors[node.id]}});
+                }}
+            }});
+            network.body.data.nodes.update(nodeUpdates);
+
+            allEdges.forEach(function(edge) {{
+                if (originalEdgeColors[edge.id]) {{
+                    edgeUpdates.push({{id: edge.id, color: originalEdgeColors[edge.id]}});
+                }}
+            }});
+            network.body.data.edges.update(edgeUpdates);
+        }}
+
+        // Wait until network is ready
+        setTimeout(function() {{
+            network.on("click", function(params) {{
+                if (params.nodes.length > 0) {{
+                    var nodeId = params.nodes[0];
+                    highlightOnClick(nodeId);
+                }}
+            }});
+
+            // Add reset button
+            var btn = document.createElement("button");
+            btn.innerHTML = "Reset Highlight";
+            btn.style.position = "absolute";
+            btn.style.top = "10px";
+            btn.style.right = "10px";
+            btn.style.zIndex = 1000;
+            btn.style.padding = "10px";
+            btn.style.backgroundColor = "#4CAF50";
+            btn.style.color = "white";
+            btn.style.border = "none";
+            btn.style.borderRadius = "5px";
+            btn.style.cursor = "pointer";
+            btn.onclick = function() {{ resetColors(); }};
+            document.body.appendChild(btn);
+        }}, 500);
+    }})();
+    </script>
