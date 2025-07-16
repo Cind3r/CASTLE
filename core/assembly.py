@@ -14,8 +14,8 @@ from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, a
 from sklearn.decomposition import PCA
 
 # self made imports
-from core.molecules import WeightMolecule
-from core.lattice import MolecularLattice
+#from core.molecules import WeightMolecule
+#from core.lattice import MolecularLattice
 
 
 @dataclass
