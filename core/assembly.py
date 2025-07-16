@@ -13,8 +13,8 @@ from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error, a
 from sklearn.decomposition import PCA
 
 # self made imports
-from molecules import WeightMolecule
-from lattice import MolecularLattice
+from core.molecules import WeightMolecule
+from core.lattice import MolecularLattice
 
 
 class MolecularAssemblyTracker:
@@ -296,7 +296,7 @@ class MolecularAssemblyTracker:
     # ========== ANALYSIS METHODS =============
     # MOVE BELOW METHODS TO ANALYSIS CLASS
     # ==============================================
-    
+
     def print_molecular_analysis(self):
         """Print comprehensive molecular assembly analysis"""
         print("=== MOLECULAR LATTICE ASSEMBLY ANALYSIS ===")

@@ -7,7 +7,7 @@ from dataclasses import dataclass
 import hashlib
 
 # self made imports
-from molecules import WeightMolecule
+from core.molecules import WeightMolecule
 
 @dataclass
 class MolecularLattice:

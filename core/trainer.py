@@ -4,8 +4,8 @@ import torch.nn.functional as F
 import numpy as np
 
 # self made imports
-from assembly import MolecularAssemblyTracker
-from NNmodel import MolecularNeuralNet
+from core.assembly import MolecularAssemblyTracker
+from core.NNmodel import MolecularNeuralNet
 
 # Basic train method
 def train_basic(model, X_train, y_train, X_test, y_test, 
