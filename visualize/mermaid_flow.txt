@@ -1,0 +1,24 @@
+---
+config:
+  layout: elk
+---
+flowchart TD
+    NN["MolecularTrackedNeuralNet"] -- Initialize --> MAT["MolecularAssemblyTracker"]
+    NN -- Weights as Tensor --> TrackWeights["Track Epoch Weights"]
+    TrackWeights --> TensorToLattice["Convert Tensors to Molecular Lattices"]
+    TensorToLattice --> UpdateLibs["Update Molecular + Lattice Libraries"] & VisualizeLattice["Visualize Molecular Lattice"]
+    UpdateLibs --> FindPathways["Determine Assembly Pathways"]
+    FindPathways --> ComputeIndex["Compute Assembly Index"]
+    ComputeIndex --> RecordReuse["Track Molecule & Lattice Reuse"] & LRAdjust["Adjust Learning Rate"]
+    RecordReuse --> UpdateTracker["Update Tracker State"] & GradMod["Modulate Gradients"]
+    Start["Begin Epoch"] --> ForwardPass["Forward Pass Through NN"]
+    ForwardPass --> Loss["Compute Loss"]
+    Loss --> Backprop["Loss.backward()"]
+    Backprop --> GradMod
+    GradMod --> OptimStep["optimizer.step()"]
+    OptimStep --> TrackWeights & PeriodicEval["Evaluate Accuracy Periodically"]
+    PeriodicEval --> ComplexityAnalysis["Analyze Accuracy vs Complexity"]
+    ComplexityAnalysis --> Report["Log Molecular & Accuracy Insights"]
+    InitWeights["Initialize With Molecular Patterns"] --> NN
+    VisualizeLattice --> PrintMolecularInfo["Print Assembly Insights"]
+    Report --> End["Training Complete"]
