@@ -1,0 +1,57 @@
+---
+config:
+  layout: elk
+---
+classDiagram
+    class MolecularAssemblyTracker {
+        -molecule_size: int
+        -weight_precision: int
+        -atomic_symbols: Dict~str, Tuple~float, float~~
+        -atomic_library: Set~WeightMolecule~
+        -lattice_library: Dict~str, MolecularLattice~
+        -assembly_pathways: Dict~str, List~str~~
+        -assembly_indices: Dict~str, int~
+        -layer_lattices: Dict~str, List~str~~
+        -molecule_reuse: Dict~WeightMolecule, Set~str~~
+        -lattice_reuse: Dict~str, List~int~~
+        -epoch_data: List~Dict~
+        +tensor_to_molecular_lattice()
+        +calculate_assembly_index()
+        +find_assembly_pathway()
+        +track_epoch()
+    }
+
+    class MolecularLattice {
+        +molecules: List~List~WeightMolecule~~
+        +layer_name: str
+        +epoch: int
+        +lattice_id: str
+        +get_molecular_formula(): str
+        +can_be_assembled_from()
+    }
+
+    class WeightMolecule {
+        +atomic_weight: float
+        +atomic_symbol: str
+        +position: Tuple~int, int~
+        +size: Tuple~int, int~
+        +__hash__()
+        +__eq__()
+        +__str__()
+    }
+
+    class MolecularTrackedNeuralNet {
+        -layers: ModuleList
+        +initialize_with_molecular_structure(layer, tracker, reference_layer_name)
+        +_initialize_weights()
+        +forward(x)
+    }
+
+    
+    MolecularTrackedNeuralNet --> "1" MolecularAssemblyTracker : uses for init
+    MolecularTrackedNeuralNet --> "many" nn.Linear : contains as layers
+    MolecularLattice --> "n x m" WeightMolecule : contains
+    MolecularAssemblyTracker --> "1..*" MolecularLattice : tracks
+    MolecularAssemblyTracker --> "1..*" WeightMolecule : stores
+    MolecularAssemblyTracker --> "0..*" MolecularLattice : reuses
+    MolecularAssemblyTracker --> "0..*" WeightMolecule : reuses
